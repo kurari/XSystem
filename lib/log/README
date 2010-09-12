@@ -1,0 +1,8 @@
+LOGGER
+
+1. How To Use
+see test/log.php
+
+2. TODO 
+a log handler with mail submit
+a observer handler with mail submit
