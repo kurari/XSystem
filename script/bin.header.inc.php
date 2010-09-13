@@ -1,6 +1,6 @@
 <?php
 define('XROOT', realpath(dirname(__FILE__).'/../'));
-require_once XROOT.'/lib/util/util.class.php';
+require_once XROOT.'/lib/base/util.class.php';
 
 XUtil::addIncludePath(
 	XUtil::makePath(XROOT,'class'), 

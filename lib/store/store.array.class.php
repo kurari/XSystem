@@ -1,6 +1,14 @@
 <?php
-
-class XStoreArray extends XStore {
+/**
+ * XStore
+ * ------------------------
+ * Type : array
+ * ------------------------
+ * 
+ *
+ */
+class XStoreArray extends XStore implements XStoreInterface
+{
 
 	private $_vars = array();
 
@@ -8,25 +16,16 @@ class XStoreArray extends XStore {
 		$this->_vars = $default;
 	}
 
-	function has($key){
+	public function doHas($key){
 		return isset($this->_vars[$key]) ? true: false;
 	}
 
-	function get($key){
-		if(is_array($key)){
-			$ret = array();
-			foreach($key	as $k) {
-				$ret[$k] = $this->get($k);
-			}
-			return $ret;
-		}
+	public function doGet($key){
 		return $this->_vars[$key];
 	}
 
-	function set($key, $value){
+	public function doSet($key, $value){
 		$this->_vars[$key] = $value;
 	}
-
-
 }
 ?>

@@ -12,8 +12,8 @@ require_once 'store/store.class.php';
 /**
  * Exception
  */
-require_once 'exception/exception.class.php';
-class XTemplaterException extends XException{ }
+require_once 'base/exception.class.php';
+class XTemplaterException extends XBaseException{ }
 
 /**
  * Resource handler

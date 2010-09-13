@@ -39,17 +39,39 @@ class XTestCase {
 	{
 		if( $ok != $value ){
 			$this->error_count++;
-			$this->errors[] = $message;
+			$this->errors[] = $message." $ok is not equal $value";
 		}
 	}
 	function assertTrue( $bool, $message = "failed" )
 	{
-		if( $bool !== true  )
-		{
+		if( $bool !== true  ) {
 			$this->error_count++;
 			$this->errors[] = $message;
 		}
 	}
+	function assertFalse( $bool, $message = "failed" )
+	{
+		if( $bool !== false  ) {
+			$this->error_count++;
+			$this->errors[] = $message;
+		}
+	}
+
+	function assertNotNull( $value, $message = "Not Null Failed")
+	{
+		if($value == null){
+			$this->error_count++;
+			$this->errors[] = $message;
+		}
+	}
+	function assertNull( $value, $message = " Null Failed")
+	{
+		if($value !== null){
+			$this->error_count++;
+			$this->errors[] = $message;
+		}
+	}
+
 
 	function run( )
 	{

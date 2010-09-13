@@ -1,6 +1,25 @@
 <?php
+/**
+ * 永続化キャッシュもでるを考え中
+ * 単純なハッシュテーブル
+ *
+ */
 
-class XStore 
+/** 
+ * XStore Interface
+ */
+interface  XStoreInterface 
+{
+	public function doHas($key);
+	public function doGet($key);
+	public function doSet($key, $value);
+}
+
+require_once 'base/exception.class.php';
+class XStoreException extends XBaseException { }
+
+
+class XStore implements XStoreInterface
 {
 	public static function factory($type, $default, $option = array())
 	{
@@ -19,8 +38,6 @@ class XStore
 			}
 			return true;
 		}
-		
-
 		if( !$this->has($key) ) $this->set($key, $value);
 	}
 
@@ -28,5 +45,44 @@ class XStore
 		return $this->get($key);
 	}
 
+	public function has($key){
+		return $this->doHas( $key );
+	}
+
+	public function get($key){
+		if(is_array($key)){
+			$ret = array();
+			foreach($key	as $k) {
+				$ret[$k] = $this->get($k);
+			}
+			return $ret;
+		}
+		return $this->doGet( $key );
+	}
+
+	public function set($key, $value){
+		$this->doSet($key, $value);
+	}
+	public function delete($key){
+		$this->doDelete($key);
+	}
+
+	/**
+	 * It Will over-write
+	 */
+	public function doHas($key){
+		return false;
+	}
+
+	public function doGet($key){
+		return false;
+	}
+
+	public function doSet($key, $value){
+		return false;
+	}
+	public function doDelete($key){
+		return false;
+	}
 }
 ?>

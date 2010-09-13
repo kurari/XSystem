@@ -1,6 +1,6 @@
 <?php
 require_once 'log/log.class.php';
-require_once 'util/util.class.php';
+require_once 'base/util.class.php';
 
 class XLogFile extends XLog
 {
