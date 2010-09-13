@@ -14,11 +14,9 @@ class XTemplaterCompilerVar extends XTemplaterCompiler
 	function compile( $tag, $args, $text, $Tpl )
 	{
 		$arr = explode('|', $tag);
-		$var = $this->compileVar($arr[0]);
+		$var = $this->compileVar(trim($arr[0]));
 
-		$output = "<?php";
-		$output.= " echo $var;";
-		$output.= "?>";
+		$output = "<?php echo $var; ?>";
 
 		return $output;
 	}

@@ -20,6 +20,10 @@ class XTemplaterException extends XException{ }
  */
 require_once 'templater/resource.class.php';
 
+/**
+ * Compile Logic
+ */
+require_once 'templater/templaterCompile.class.php';
 class XTemplater extends XBase
 {
 	/**
@@ -52,7 +56,7 @@ class XTemplater extends XBase
 	 * plugins 
 	 * @var array
 	 */
-	protected $plugin = array(
+	public $plugin = array(
 		'resource'=>array( ),
 		'compiler'=>array( )
 	);
@@ -62,6 +66,11 @@ class XTemplater extends XBase
 		$this->pluginDir = array(
 			dirname(__FILE__).'/plugin'
 		);
+	}
+
+	public function getDelimiter( )
+	{
+		return array( $this->leftDelimiter, $this->rightDelimiter );
 	}
 
 	/**
@@ -152,6 +161,12 @@ class XTemplater extends XBase
 		return $this->plugin['resource'][$type] = XTemplaterResource::factory( $get, $hasCache, $putCache, $getCache, $gcCache );
 	}
 
+	/**
+	 * register compiler handler
+	 *
+	 * @param string name
+	 * @param callback compile
+	 */
 	function registerCompilerHandler( $type, $compile ) {
 		return $this->plugin['compiler'][$type] = XTemplaterCompiler::factory( $compile );
 	}
@@ -182,81 +197,9 @@ class XTemplater extends XBase
 	 */
 	function compile( $data )
 	{
-		$this->loadCompilerHandler( );
-
-		$l        = $this->leftDelimiter;
-		$r        = $this->rightDelimiter;
-		$quick    = '/(.*?)'.preg_quote($l) .'(.*?)'.preg_quote($r).'(.*)/xms';
-
-		$text     = $data;
-		$blocks   = array('foreach');
-		$isEnv    = false;
-		$buf      = "";
-		$cnt      = 0;
-		$compiled = "";
-
-		$compilers = array_keys( $this->plugin['compiler'] );
-
-		while(preg_match($quick, $text, $m)){
-			// next data
-			$text = $m[3];
-
-			// get tag info
-			$tagInfo = explode(" ", $m[2],2);
-			$tagName = $tagInfo[0];
-			$tagArg  = XUtil::arrayGetOr($tagInfo,1,"");
-
-			// if env tag
-			if($isEnv == false){
-
-				// out put 
-				$compiled.= $m[1];
-
-				// if env start
-				if( in_array($tagName, $compilers) && $m[2]{0} != '/' ) {
-					// save current tag info
-					$envName = $tagName; $envArg = $tagArg;
-
-					// initialize
-					$buf = ""; $cnt = 0; 
-
-					// start enviroment
-					$isEnv = true;
-					continue;
-				}else{
-
-					// for compiler
-					if( in_array($tagName, $compilers) ) {
-						$compiler = $this->getCompilerHandler($tagName);
-						$compiled.= $compiler->doCompile( "$tagName $tagArg", $tagArg, "", $this);
-					}elseif($tagName{0} == '$'){
-						// for $hoge
-						$compiler = $this->getCompilerHandler('var');
-						$compiled.= $compiler->doCompile("$tagName $tagArg", $tagName, "", $this);
-					}
-				}
-			}
-
-			// if in env
-			if($isEnv == true){
-				// cnt up if same name of env open
-				if($tagName == $envName && $m[2]{0} != '/') $cnt++;
-				if($tagName == "/".$envName) $cnt--;
-				$buf .= $m[1];
-
-				// if cnt is -1 close
-				if( $cnt < 0 ){
-					// for compiler
-					$compiler = $this->getCompilerHandler($envName);
-					$compiled.= $compiler->doCompile( "$envName $envArg", $envArg, $buf, $this);
-					$isEnv = false; $buf = ""; $cnt = 0;
-				}else{
-					$buf .= $l.$m[2].$r;
-				}
-			}
-		}
-		$compiled.=$text;
-		return $compiled;
+		$C = new XTemplaterComplie( $this );
+		$C->compile( $data );
+		return $C->fetch( );
 	}
 }
 
