@@ -31,9 +31,9 @@ class XTestRunner
 			$msg = "";
 			foreach($result as $k=>$r){
 				$count++;
-				if($r['status'] != "OK") {
+				if(XUtil::arrayGetOr($r,'status','NG') != "OK") {
 					$error_count++;
-					$msg = $k.":".$r['status']."\n".implode("\n", XUtil::arrayGetOr($r,'errors',array()));
+					$msg = $k.":".XUtil::arrayGetOr($r,'status','NG')."\n".implode("\n", XUtil::arrayGetOr($r,'errors',array()));
 				}
 			}	
 

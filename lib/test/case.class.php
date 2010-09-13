@@ -35,6 +35,21 @@ class XTestCase {
 			$this->errors[] = $message;
 		}
 	}
+	function assertEquals( $ok, $value, $message = 'failed')
+	{
+		if( $ok != $value ){
+			$this->error_count++;
+			$this->errors[] = $message;
+		}
+	}
+	function assertTrue( $bool, $message = "failed" )
+	{
+		if( $bool !== true  )
+		{
+			$this->error_count++;
+			$this->errors[] = $message;
+		}
+	}
 
 	function run( )
 	{
@@ -51,10 +66,10 @@ class XTestCase {
 					$this->results[$test]['status'] = 'OK';
 				}
 			}catch(Exception $e){
-				$this->results[$test]['errors'] = $e->getMessage().' at '.$e->getFile().' on '.$e->getLine();
+				$this->results[$test]['errors'][] = $e->getMessage().' at '.$e->getFile().' on '.$e->getLine();
 			}
 		}
-		var_dump($this->results);
+		return $this->results;
 	}
 }
 ?>

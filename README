@@ -1,0 +1,35 @@
+In Application
+
+$RPC = XSystemRPC::request(
+ 'application_group' => 'user',
+ 'application_name'  => 'NEW_REGISTER',
+);
+$RPC->bindParam('name','Hajime');
+$RPC->bindParam('email','hajime@avap.co.jp');
+
+$Result = $RPC->send( );
+
+XSystemApiRequest
+XSystemApiResult
+
+FrameWork Side で コールされるプロセスを変更する
+
+package/users/api.class.php
+
+class UserApi {
+
+	function accept( $key, $value ) {
+		switch( $key ){
+			case 'NEW_REGISTER':
+				return $this->newRegister( $value );
+			break;
+		}
+  }
+}
+
+class Api {
+	map = array('user.NEW_REGISTER'=>'system.NEW_REGISTER');
+	function accept( $group, $key, $value ) {
+		
+	}
+}

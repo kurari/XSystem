@@ -20,7 +20,6 @@ class BaseTest extends XTestCase
 	function testGetValue( )
 	{
 		$data = "data";
-		echo $XTS;
 		$this->assertEquala('data', $data,'input output not much');
 	}
 }

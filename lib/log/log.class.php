@@ -64,22 +64,51 @@ class XLog {
 	private $_listeners = array();
 
 
+	/**
+	 * create mask MAX
+	 */
 	public static function MAX($level)
 	{
 		return ((1 << ($level + 1)) - 1);
 	}
+
+	/**
+	 * create mask MIN
+	 */
 	public static function MIN($level)
 	{
 		return XLOG_ALL ^ ((1 << $level) - 1);
 	}
+
+	/**
+	 * create mask 
+	 */
 	public static function MASK($level)
 	{
 		return (1 << $level);
 	}
+
+	/**
+	 * if is musk
+	 */
 	public function _isMasked($level)
 	{
 		return (XLog::MASK($level) & $this->_mask);
 	}
+
+	public function levelToName( $level ){
+		static $dict;
+		if(empty($dict)) $dict = array_flip($this->dict);
+		return $dict[$level];
+	}
+
+	public function nameToLevel( $name ){
+		return $this->dict[$name];
+	}
+
+	/**
+	 * construct
+	 */
 	public function __construct( ){
 		$this->dict = array(
 			'emerg'   => XLOG_EMERG,
@@ -91,16 +120,6 @@ class XLog {
 			'info'    => XLOG_INFO,
 			'debug'   => XLOG_DEBUG
 		);
-	}
-
-	public function levelToName( $level ){
-		static $dict;
-		if(empty($dict)) $dict = array_flip($this->dict);
-		return $dict[$level];
-	}
-
-	public function nameToLevel( $name ){
-		return $this->dict[$name];
 	}
 
 	/**
@@ -182,6 +201,5 @@ class XLog {
 			}
 		}
 	}
-
 }
 ?>

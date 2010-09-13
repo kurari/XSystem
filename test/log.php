@@ -11,21 +11,37 @@ class LogTest extends XTestCase
 
 	function init( )
 	{
-		$this->handler = XLog::factory('file', 'default' );
-		$this->dirname = dirname(__FILE__);
+		$this->dirname = dirname(__FILE__).'/data';
 	}
 
 
 	function testFactory( )
 	{
-		$handler = XLog::factory('file', 'default' );
+		$handler = XLog::factory(
+			'file', 
+			'default', 
+			array(
+				'append'   => 0,
+				'dirname'  => $this->dirname,
+				'filename' => 'test.log'
+			), 
+			XLOG_WARNING 
+		);
 		$this->assertEquala('XLogFile', get_class($handler), 'Object Type unmuch');
-
 	}
 
 	function testLogWrite( )
 	{
-		$handler = XLog::factory('file', 'default', array('append'=>0) );
+		$handler = XLog::factory(
+			'file', 
+			'default', 
+			array(
+				'append'   => 0,
+				'dirname'  => $this->dirname,
+				'filename' => 'test.log'
+			), 
+			XLOG_DEBUG
+		);
 		$handler->info("TEST");
 		$handler->notice("TEST");
 		$handler->debug("TEST");
@@ -33,7 +49,7 @@ class LogTest extends XTestCase
 		$handler->err("TEST");
 		$handler->crit("TEST");
 		$handler->close();
-		$this->assertEquala(6, count(file( 'php.log' )), 'Log Write Failed');
+		$this->assertEquala(6, count(file( XUtil::makePath($this->dirname, 'test.log'))), 'Log Write Failed');
 	}
 
 	function testLogMask( )

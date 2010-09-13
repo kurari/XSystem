@@ -1,11 +1,15 @@
 <?php
-define('XSCRIPT',dirname(__FILE__));
 define('XROOT', realpath(dirname(__FILE__).'/../'));
-require_once XSCRIPT.'/function.inc.php';
-xAddIncludePath(xMakePath(XROOT,'class'), xMakePath(XROOT,'lib'));
+require_once XROOT.'/lib/util/util.class.php';
 
-spl_autoload_register('xAutoLoad');
+XUtil::addIncludePath(
+	XUtil::makePath(XROOT,'class'), 
+	XUtil::makePath(XROOT,'lib')
+);
 
+spl_autoload_register(
+	array('XUtil','autoLoad')
+);
 
 // Error to Exception
 function exception_error_handler($errno, $errstr, $errfile, $errline ) {

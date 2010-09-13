@@ -21,6 +21,5 @@ class XBase {
 		throw new XNoMethodException("$name is not defined ".print_r($args,true));
 	}
 
-
 }
 ?>
