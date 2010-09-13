@@ -1,0 +1,6 @@
+Sep 13 05:22:52 info [default] TEST
+Sep 13 05:22:52 notice [default] TEST
+Sep 13 05:22:52 debug [default] TEST
+Sep 13 05:22:52 warning [default] TEST
+Sep 13 05:22:52 err [default] TEST
+Sep 13 05:22:52 crit [default] TEST
