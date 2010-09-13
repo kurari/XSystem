@@ -14,6 +14,27 @@ require_once 'store/store.class.php';
  */
 require_once 'base/exception.class.php';
 class XTemplaterException extends XBaseException{ }
+class XTemplaterDisplayException extends XBaseException{ 
+	public $orign;
+	public $code;
+
+	function __construct($e, $code)
+	{
+		$this->origin = $e;
+		$this->code = $code;
+	}
+
+	function getCompiledCode( )
+	{
+		return $code;
+	}
+
+	function getOrign( )
+	{
+		return $this->origin;
+	}
+
+}
 
 /**
  * Resource handler
@@ -61,6 +82,18 @@ class XTemplater extends XBase
 		'compiler'=>array( )
 	);
 
+	/**
+	 * template vars
+	 * @var array
+	 */
+	protected $_template_vars = array( );
+
+	/**
+	 * compiled code
+	 * @var string
+	 */
+	protected $_last_code = false;
+
 	function __construct( )
 	{
 		$this->pluginDir = array(
@@ -68,9 +101,50 @@ class XTemplater extends XBase
 		);
 	}
 
+	/**
+	 * Get Compiled Last Code
+	 *
+	 * @return string last compiled code
+	 */
+	public function getLastCode( )
+	{
+		return $this->_last_code;
+	}
+
+	/**
+	 * Get Delimiter
+	 *
+	 * @return array {leftDelimiter,rightDelimiter}
+	 */
 	public function getDelimiter( )
 	{
 		return array( $this->leftDelimiter, $this->rightDelimiter );
+	}
+
+	/**
+	 * register resource handler
+	 *
+	 * @param string name
+	 * @param callback get
+	 * @param callback hasCache
+	 * @param callback putCache
+	 * @param callback getCachs
+	 * @param callback gcCachs
+	 */
+	public function registerResourceHandler( $type, $get, $hasCache, $putCache, $getCache, $gcCache ) 
+	{
+		return $this->plugin['resource'][$type] = XTemplaterResource::factory( $get, $hasCache, $putCache, $getCache, $gcCache );
+	}
+
+	/**
+	 * register compiler handler
+	 *
+	 * @param string name
+	 * @param callback compile
+	 */
+	public function registerCompilerHandler( $type, $compile ) 
+	{
+		return $this->plugin['compiler'][$type] = XTemplaterCompiler::factory( $compile );
 	}
 
 	/**
@@ -147,29 +221,6 @@ class XTemplater extends XBase
 		);
 	}
 
-	/**
-	 * register resource handler
-	 *
-	 * @param string name
-	 * @param callback get
-	 * @param callback hasCache
-	 * @param callback putCache
-	 * @param callback getCachs
-	 * @param callback gcCachs
-	 */
-	function registerResourceHandler( $type, $get, $hasCache, $putCache, $getCache, $gcCache ) {
-		return $this->plugin['resource'][$type] = XTemplaterResource::factory( $get, $hasCache, $putCache, $getCache, $gcCache );
-	}
-
-	/**
-	 * register compiler handler
-	 *
-	 * @param string name
-	 * @param callback compile
-	 */
-	function registerCompilerHandler( $type, $compile ) {
-		return $this->plugin['compiler'][$type] = XTemplaterCompiler::factory( $compile );
-	}
 
 	/**
 	 * resource getter
@@ -201,7 +252,46 @@ class XTemplater extends XBase
 		$C->compile( $data );
 		return $C->fetch( );
 	}
+
+	/**
+	 * display
+	 */
+	function display( $path, $additional_vars= array() )
+	{
+		// split resource type and path
+		$res = explode( '://', $path, 2);
+
+		// if it was not correct
+		if(empty($res[1])) throw new XTemplaterException('Resource path incorrect (%s)',$path);
+
+		$type = $res[0];
+		$path = $res[1];
+
+		if(false == $handler = $this->getResourceHandler( $type )) throw new XTemplaterException('Resource type %s is not registerd',$type);
+
+		$text = $handler->doGet( $path, $this );
+		$code = $this->_last_code = $this->compile( $text );
+
+		$store = XStore::factory('array', $this->_template_vars);
+		$store->set( $additional_vars );
+
+		try {
+			eval('?> '.$code);
+		}catch(Exception $e) {
+			throw new XTemplaterDisplayException( $e, $code );
+		}
+	}
+
+	/**
+	 * assing vars
+	 */
+	function assign( $key, $value )
+	{
+		if(is_array($key)){
+			foreach( $key as $k=>$v) $this->assign($k, $v);
+			return false;
+		}
+		$this->_template_vars[$key] = $value;
+	}
 }
-
-
 ?>

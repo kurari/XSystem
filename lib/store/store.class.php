@@ -60,7 +60,15 @@ class XStore implements XStoreInterface
 		return $this->doGet( $key );
 	}
 
-	public function set($key, $value){
+	public function set($key, $value = false){
+		if(!is_array($key) && $value == false) return false;
+
+		if(is_array($key)){
+			foreach($key	as $k => $v) {
+				$this->set($k, $v);
+			}
+			return true;
+		}
 		$this->doSet($key, $value);
 	}
 	public function delete($key){

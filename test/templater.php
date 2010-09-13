@@ -49,5 +49,16 @@ class TemplaterTest extends XTestCase
 		$data = $handler->compile($data);
 		$this->assertEquals(trim(file_get_contents("$this->dirname/block.tpl.ok")),$data, $data);
 	}
+
+	function testDisplay( )
+	{
+		$handler = new XTemplater( );
+		$handler->assign('name', 'Hajime');
+		$handler->assign('place', array('japan','mongolia'));
+		ob_start();
+		$handler->display("file://$this->dirname/test.display.tpl");
+		$data = ob_get_clean();
+		$this->assertEquals('Name: HajimePlace: japanPlace: mongolia', trim($data));
+	}
 }
 ?>

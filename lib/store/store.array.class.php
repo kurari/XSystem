@@ -21,7 +21,9 @@ class XStoreArray extends XStore implements XStoreInterface
 	}
 
 	public function doGet($key){
-		return $this->_vars[$key];
+		if($this->doHas($key))
+			return $this->_vars[$key];
+		return false;
 	}
 
 	public function doSet($key, $value){

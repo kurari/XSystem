@@ -3,14 +3,14 @@
 <h2><?php echo $store->get("table")->title; ?></h2>
 <table>
 <?php 
-$from = '$store->get("table")->getDatas()'; 
+$from = $store->get("table")->getDatas(); 
 if(count($from)>0) foreach( $from as $key=>$value ):
 $store->set('row',$value); 
 $store->set('key',$key); 
 ?>
 <tr>
 <?php 
-$from = '$store->get("row")'; 
+$from = $store->get("row"); 
 if(count($from)>0) foreach( $from as $key=>$value ):
 $store->set('col',$value); 
 $store->set('kk',$key); 
@@ -22,13 +22,13 @@ bbbbb
 unset($from);
 unset($key);
 unset($value);
-engforeach; 
+endforeach; 
 ?>
 </tr>
 <?php 
 unset($from);
 unset($key);
 unset($value);
-engforeach; 
+endforeach; 
 ?>
 </table>
