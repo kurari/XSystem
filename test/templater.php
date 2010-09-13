@@ -4,6 +4,7 @@
  */
 require_once 'templater/templater.class.php';
 
+
 class TemplaterTest extends XTestCase
 {
 	public $handler;
@@ -33,12 +34,12 @@ class TemplaterTest extends XTestCase
 		$this->assertEquals('{{$title}}',$data, $data);
 	}
 
-	function estCompile( )
+	function testCompile( )
 	{
 		$handler = new XTemplater( );
 		$data = $handler->getResource("file://$this->dirname/test.tpl");
 		$data = $handler->compile($data);
-		$this->assertEquals('<?php echo $store->get(\'title\'); ?>',$data, $data);
+		$this->assertEquals('<?php echo $store->get("title"); ?>',$data, $data);
 	}
 
 	function testBlockCompile( )
@@ -46,7 +47,7 @@ class TemplaterTest extends XTestCase
 		$handler = new XTemplater( );
 		$data = $handler->getResource("file://$this->dirname/block.tpl");
 		$data = $handler->compile($data);
-		$this->assertEquals('<?php echo $store->get(\'title\'); ?>',$data, $data);
+		$this->assertEquals(trim(file_get_contents("$this->dirname/block.tpl.ok")),$data, $data);
 	}
 }
 ?>

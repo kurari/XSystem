@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__FILE__).'/../script/bin.header.inc.php';
 require_once 'test/runner.class.php';
+ini_set('max_execution_time', 1);
 
 try{
 	$all = array_slice($argv, 1);
