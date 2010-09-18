@@ -6,7 +6,7 @@
  * -----------------------------
  */
 
-class XConfIni extends XConf
+class XConfigIni extends XConfig
 {
 
 	public function load( $file )
@@ -14,10 +14,10 @@ class XConfIni extends XConf
 		try {
 			$fp = fopen($file,'r');
 		}catch(Exception $e){
-			throw XConfException("file error %s", $e->getMessage());
+			throw XConfigException("file error %s", $e->getMessage());
 		}
 
-		$Root = new XConfContainer( );
+		$Root = new XConfigContainer( );
 		$C = $Root;
 
 		while( $line = fgets( $fp, 1024) ) {
@@ -47,14 +47,14 @@ class XConfIni extends XConf
 	}
 }
 
-class XConfContainer 
+class XConfigContainer 
 {
 	var $children = array();
 	var $section = array();
 	var $values = array( );
 
 	function createSection( $name ) {
-		$this->section[$name] = new XConfContainer( );
+		$this->section[$name] = new XConfigContainer( );
 		return $this->section[$name];
 	}
 
