@@ -9,7 +9,6 @@
  */
 class XStoreArray extends XStore implements XStoreInterface
 {
-
 	private $_vars = array();
 
 	function __construct( $default, $option ){

@@ -13,6 +13,7 @@ require_once 'store/store.class.php';
  * Exception
  */
 require_once 'base/exception.class.php';
+require_once 'base/base.class.php';
 class XTemplaterException extends XBaseException{ }
 class XTemplaterDisplayException extends XBaseException{ 
 	public $orign;
@@ -45,6 +46,8 @@ require_once 'templater/resource.class.php';
  * Compile Logic
  */
 require_once 'templater/templaterCompile.class.php';
+require_once 'templater/compiler.class.php';
+require_once 'templater/resource.class.php';
 class XTemplater extends XBase
 {
 	/**

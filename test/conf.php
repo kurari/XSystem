@@ -1,5 +1,5 @@
 <?php
-require_once "conf/conf.class.php";
+require_once "config/config.class.php";
 
 /**
  * Base Object Test
@@ -13,17 +13,16 @@ class ConfTest extends XTestCase
 
 	function testFactory( )
 	{
-		$Conf = XConf::factory('ini');
-		$this->assertEquals( get_class($Conf), 'XConfIni');
+		$Conf = XConfig::factory('ini');
+		$this->assertEquals( get_class($Conf), 'XConfigIni');
 	}
 
 	function testParse( )
 	{
-		$Conf = XConf::factory('ini');
+		$Conf = XConfig::factory('ini');
 		$file = dirname(__FILE__).'/data/test.ini';
-		$Container = $Conf->load( $file );
-
-		var_dump($Container->toArray( ));
+		$Conf->load( $file );
+		$this->assertTrue($Conf->get('log.option.append'));
 	}
 
 }

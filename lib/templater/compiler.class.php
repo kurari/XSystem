@@ -31,7 +31,7 @@ class XTemplaterCompiler
 	 * Utility
 	 */
 	function compileVar( $text ) {
-		$text = preg_replace('/\$([a-zA-Z0-9_]+)/', '$store->get("\1")', $text);
+		$text = preg_replace('/\$([a-zA-Z0-9_.]+)/', '$store->get("\1")', $text);
 		return $text;
 	}
 

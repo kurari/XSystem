@@ -1,0 +1,8 @@
+SAMPLE BBS
+
+admin
+  -- delete entry
+
+user or guest
+  -- display entrys
+  -- add entry
