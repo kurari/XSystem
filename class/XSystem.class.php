@@ -38,7 +38,7 @@ class XSystem  {
 
 	public function display( $Message ){
 		$file = $Message->get('app');
-		$tpl  = $this->Conf->appDir."/$file.html";
+		$tpl  = $this->Conf->viewDir."/$file.html";
 		$View = new XSystemView($tpl);
 		$View->assign("conf", $this->Conf->get());
 		$View->run( );
@@ -54,7 +54,15 @@ class XSystemView extends XTemplater
 	public function __construct( $tpl )
 	{
 		parent::__construct( );
+		$this->registerCompilerHandler( "snippet", array($this,'snippet') ) ;
 		$this->tpl = $tpl;
+	}
+
+	public function snippet($name, $option, $template, $Tpl, $path)
+	{
+		$Opt = $Tpl->getOpt($option);
+
+		return $template;
 	}
 
 	public function run( )

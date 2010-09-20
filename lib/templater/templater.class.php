@@ -97,11 +97,28 @@ class XTemplater extends XBase
 	 */
 	protected $_last_code = false;
 
+	/**
+	 * cache controller
+	 */
+	public $Cache;
+
 	function __construct( )
 	{
 		$this->pluginDir = array(
 			dirname(__FILE__).'/plugin'
 		);
+		$this->cacheDir = "/tmp";
+
+	}
+
+	function getCacheCtrl( )
+	{
+		if( empty($this->Cache) ) {
+			require_once 'kvs/kvs.class.php';
+			$dir = $this->cacheDir;
+			$this->Cache = XKeyValueStore::factory('sqlite', array('path'=>$dir."/cache.db"));
+		}
+		return $this->Cache;
 	}
 
 	/**
@@ -129,14 +146,15 @@ class XTemplater extends XBase
 	 *
 	 * @param string name
 	 * @param callback get
+	 * @param callback getExpiredTime
 	 * @param callback hasCache
 	 * @param callback putCache
 	 * @param callback getCachs
 	 * @param callback gcCachs
 	 */
-	public function registerResourceHandler( $type, $get, $hasCache, $putCache, $getCache, $gcCache ) 
+	public function registerResourceHandler( $type, $get, $expired, $hasCache, $putCache, $getCache, $gcCache ) 
 	{
-		return $this->plugin['resource'][$type] = XTemplaterResource::factory( $get, $hasCache, $putCache, $getCache, $gcCache );
+		return $this->plugin['resource'][$type] = XTemplaterResource::factory( $get, $expired, $hasCache, $putCache, $getCache, $gcCache );
 	}
 
 	/**
@@ -217,6 +235,7 @@ class XTemplater extends XBase
 		return $this->registerResourceHandler( 
 			$type,
 			array($o,'get'),
+			array($o,'getExpiredTime'),
 			array($o,'hasCache'),
 			array($o,'getCache'),
 			array($o,'putCache'),
@@ -249,9 +268,9 @@ class XTemplater extends XBase
 	/**
 	 * compile
 	 */
-	function compile( $data )
+	function compile( $data, $path = false )
 	{
-		$C = new XTemplaterComplie( $this );
+		$C = new XTemplaterComplie( $this, $path );
 		$C->compile( $data );
 		return $C->fetch( );
 	}
@@ -259,21 +278,30 @@ class XTemplater extends XBase
 	/**
 	 * display
 	 */
-	function display( $path, $additional_vars= array() )
+	function display( $resource, $additional_vars= array() )
 	{
 		// split resource type and path
-		$res = explode( '://', $path, 2);
+		$res = explode( '://', $resource, 2);
 
 		// if it was not correct
-		if(empty($res[1])) throw new XTemplaterException('Resource path incorrect (%s)',$path);
+		if(empty($res[1])) throw new XTemplaterException('Resource path incorrect (%s)',$resource);
 
 		$type = $res[0];
 		$path = $res[1];
 
 		if(false == $handler = $this->getResourceHandler( $type )) throw new XTemplaterException('Resource type %s is not registerd',$type);
 
-		$text = $handler->doGet( $path, $this );
-		$code = $this->_last_code = $this->compile( $text );
+		// GC
+		$CC = $this->getCacheCtrl( );
+		$CC->gc($handler->getExpiredTime($path,$this), $resource);
+
+		if(false === $code = $CC->get( $resource ) ){
+			$text    = $handler->doGet( $path, $this );
+			$expired = $handler->getExpiredTime( $path, $this );
+			$code    = $this->compile( $text, $resource );
+			$CC->set( $resource, $code );
+		}
+		$this->_last_code = $code;
 
 		$store = XStore::factory('array', $this->_template_vars);
 		$store->set( $additional_vars );
@@ -285,6 +313,7 @@ class XTemplater extends XBase
 		}
 	}
 
+
 	/**
 	 * assing vars
 	 */
@@ -295,6 +324,23 @@ class XTemplater extends XBase
 			return false;
 		}
 		$this->_template_vars[$key] = $value;
+	}
+
+	function getOpt( $text ){
+		$text = $this->compileVar( $text );
+		if( preg_match_all('/\s*([^=]+)\s*=\s*( (?:[^"\'(\s]|  "[^"]+" | \([^)]*\) |  \'[^\']+\')+ )\s*/xms',$text,$m) ){
+			$opt = array_combine( $m[1], $m[2] );
+		}
+		$store = XStore::factory('array', $opt);
+		return $store;
+	}
+
+	/**
+	 * Utility
+	 */
+	function compileVar( $text ) {
+		$text = preg_replace('/\$([a-zA-Z0-9_.]+)/', '$store->get("\1")', $text);
+		return $text;
 	}
 }
 ?>

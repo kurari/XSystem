@@ -42,10 +42,13 @@ class XTemplaterComplie {
 	 */
 	private $compilers = array();
 
-	function __construct( $Tpl )
+	private $path;
+
+	function __construct( $Tpl, $path )
 	{
 		$this->Tpl = $Tpl;
 		$this->Tpl->loadCompilerHandler( );
+		$this->path = $path;
 		$this->compilers = array_keys( $this->Tpl->plugin['compiler'] );
 	}
 
@@ -60,19 +63,20 @@ class XTemplaterComplie {
 	public function compile( $data )
 	{
 		list($l,$r) = $this->Tpl->getDelimiter( );
-		$quick      = '/(.*?)'.preg_quote($l) .'(.*?)'.preg_quote($r).'(.*)/xms';
+		$quick      = '/(?P<bef>.*?)(?P<tag>'.preg_quote($l) .'(?P<inner>.*?)'.preg_quote($r).')(?P<aft>.*)/xms';
 		$text       = $data;
 		while(preg_match($quick, $text, $m)){
 			// next data
-			$text = $m[3];
+			$text = $m['aft'];
 			// get tag info
-			list($tagName,$tagArg) = $this->_getTagInfo($m[2]);
+			list($tagName,$tagArg) = $this->_getTagInfo($m['inner']);
 			// if env tag
 			if($this->isEnv == false){
 				// out put 
-				$this->_output($m[1]);
+				$this->_output($m['bef']);
+
 				// if env start
-				if( $this->_isBlock( $tagName, $m[2] ) ) {
+				if( $this->_isBlock( $tagName, $m['inner'] ) ) {
 					$this->_startEnv( $tagName, $tagArg );
 					continue;
 				}
@@ -85,18 +89,23 @@ class XTemplaterComplie {
 					// for $hoge
 					$compiler = $this->Tpl->getCompilerHandler('var');
 					$this->_output( $compiler->doCompile("$tagName $tagArg", $tagName, "", $this->Tpl) );
+					continue;
 				}
+
+				// nothing
+				$this->_output($m['tag']);
+
 			}else{
 				// cnt up if same name of env open
-				if($tagName == $this->envName && $m[2]{0} != '/') $this->cnt++;
+				if($tagName == $this->envName && $m['inner']{0} != '/') $this->cnt++;
 				if($tagName == "/".$this->envName) $this->cnt--;
-				$this->buf .= $m[1];
+				$this->buf .= $m['bef'];
 				// if cnt is -1 close
 				if( $this->cnt < 0 ){
 					$this->_output( $this->_tagCompile( $this->envName, $this->envArg, $this->buf ) );
 					$this->_endEnv( );
 				}else{
-					$this->buf .= $l.$m[2].$r;
+					$this->buf .= $m['tag'];
 				}
 			}
 		}
@@ -146,7 +155,7 @@ class XTemplaterComplie {
 	private function _tagCompile( $tag, $arg, $buf = "" )
 	{
 		$compiler = $this->Tpl->getCompilerHandler($tag);
-		return $compiler->doCompile( "$tag $arg", $arg, $buf, $this->Tpl);
+		return $compiler->doCompile( "$tag $arg", $arg, $buf, $this->Tpl, $this->path);
 	}
 }
 ?>

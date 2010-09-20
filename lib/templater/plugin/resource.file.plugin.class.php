@@ -21,6 +21,11 @@ class XTemplaterResourceFile extends XTemplaterResource
 		return trim($data);
 	}
 
+	function getExpiredTime( $path, $Tpl )
+	{
+		return filemtime( $path );
+	}
+
 	function hadCache( )
 	{
 		return false;

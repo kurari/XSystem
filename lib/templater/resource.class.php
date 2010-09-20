@@ -17,15 +17,17 @@ class XTemplaterResource
 	 * create resource handler
 	 *
 	 * @param callback get
+	 * @param callback getExpiredTime
 	 * @param callback hasCache
 	 * @param callback putCache
 	 * @param callback getCachs
 	 * @param callback gcCachs
 	 */
-	public static function factory( $get, $hasCache, $putCache, $getCache, $gcCache )
+	public static function factory( $get, $getExpiredTime, $hasCache, $putCache, $getCache, $gcCache )
 	{
 		$object = new XTemplaterResource( );
 		$object->setHandler('get', $get);
+		$object->setHandler('getExpiredTime', $getExpiredTime);
 		$object->setHandler('hasCache', $hasCache);
 		$object->setHandler('putCache', $putCache);
 		$object->setHandler('getCache', $getCache);
@@ -53,6 +55,14 @@ class XTemplaterResource
 	{
 		$args = func_get_args( );
 		return call_user_func_array($this->_handlers['get'], $args);
+	}
+	/**
+	 * throw to handlers
+	 */
+	public function getExpiredTime( )
+	{
+		$args = func_get_args( );
+		return call_user_func_array($this->_handlers['getExpiredTime'], $args);
 	}
 }
 ?>
